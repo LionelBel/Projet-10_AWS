@@ -1,0 +1,36 @@
+
+### CloudFormation automatiser l'installation de notre infrastructure sur AWS ###
+
+### Nos services sont dans la Zone de disponibilité AWS Europe(Paris):eu-west-3 ###
+
+#################################
+### Infrastructure du système ###
+#################################
+
+## Création du sécurité groupe qui sera associer au Load Balancer
+AWSTemplateFormatVersion:  2010-09-09
+Description:  >-
+  AWS CloudFormation infrastructure Template
+##########################################################
+## Intégration de paramètres permettant de standardiser ##
+##    le template CloudFordation.                       ##
+#Parameters:                                             #
+#  VpcIdentifier:                                        #
+#    Type:  String                                       #
+#    Description: The target VPC identifier.             #
+##########################################################
+Resources: 
+  WebsiteEC2SecurityGroup: 
+    Type:  AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription:  Website EC2 security group 
+      SecurityGroupEgress: 
+        - IpProtocol:  -1
+          CidrIp:  0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      VpcId: Projet10VPC
+  
