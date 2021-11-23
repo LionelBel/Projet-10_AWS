@@ -20,3 +20,4 @@ ENV WORDPRESS_ADMIN_USER: wordpress \
 # Ports d'écoute
 EXPOSE 80 443 3306
 
+CMD ["apache2-foreground"]  
