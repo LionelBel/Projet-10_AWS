@@ -1,8 +1,10 @@
 # Image Docker à télécharger
-FROM wordpress:lastest
+FROM wordpress
 
 # Dépendances à installer
-RUN yum install -y mariadb-client\ 
+RUN apt update \ 
+    && apt upgrade -y \ 
+    && apt install -y mariadb-client \ 
     && curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \ 
     && chmod +x wp-cli.phar
 
@@ -15,5 +17,6 @@ ENV WORDPRESS_ADMIN_USER: wordpress \
     WORDPRESS_DB_USER: wordpress \
     WORDPRESS_DB_PASSWORD: wordpress 
 
-# Port d'écoute
-EXPOSE 80 443
+# Ports d'écoute
+EXPOSE 80 443 3306
+
