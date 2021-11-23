@@ -15,6 +15,5 @@ ENV WORDPRESS_ADMIN_USER: wordpress \
     WORDPRESS_DB_USER: wordpress \
     WORDPRESS_DB_PASSWORD: wordpress 
 
-
 # Port d'écoute
-EXPOSE 80
+EXPOSE 80 443
