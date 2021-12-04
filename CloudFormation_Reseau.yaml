@@ -60,7 +60,7 @@ Resources:
       CidrBlock: 10.0.1.0/24 # "!Select [ 1, !Cidr [ !GetAtt VPC.CidrBlock, 2, 8 ]]" : synthaxe avec paramètre
       Tags:
         - Key: Name
-          Value: 'Wordpress-prive'
+          Value: 'VPN'
       VpcId: !Ref Projet10VPC
 
 ## Création de la passerelle internet
@@ -77,24 +77,6 @@ Resources:
     Properties:
       VpcId: !Ref Projet10VPC
       InternetGatewayId: !Ref InternetGateway
-
-## Création de la passerelle NAT
-# Création IP Elastic
-  NatEipC:
-    Type: AWS::EC2::EIP
-    Properties:
-      Domain: vpc
-
-# Création de la passerelle NAT, association à l'IP Elastic et le sous-réseau privé
-  NatGatewayC:
-    DependsOn: AttachInternetGateway
-    Type: AWS::EC2::NatGateway
-    Properties:
-      AllocationId: !GetAtt NatEipC.AllocationId
-      SubnetId: !Ref PrivateSubnetC
-      Tags:
-        - Key: Name
-          Value: MainVPC-nat
 
 ## Céation des tables de routages, association aux sous-réseaux et création des routes
 # Création des tables de routages 'Wordpress-public-1'
@@ -149,16 +131,16 @@ Resources:
 
               ########################################
 
-# Création des tables de routages 'Wordpress-privé'
+# Création des tables de routages 'VPN-privé'
   PrivateRouteTableC:
     Type: AWS::EC2::RouteTable
     Properties: 
       VpcId: !Ref Projet10VPC
       Tags:
         - Key: Name
-          Value: Wordpress-route-privé
+          Value: VPN-route-privé
 
-# Attache au sous-réseau 'Wordpress-privé'
+# Attache au sous-réseau 'VPN-privé'
   AttachPrivateRouteTableC:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -166,11 +148,11 @@ Resources:
       SubnetId: !Ref PrivateSubnetC
 
 # Routes pour sous-réseau 'Wordpress-privé'
-  PrivateRouteC:
+   PrivateRouteC:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGatewayC
+      GatewayId: !Ref InternetGateway
       RouteTableId: !Ref PrivateRouteTableC
 
 #############################################################
