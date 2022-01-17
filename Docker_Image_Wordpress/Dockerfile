@@ -17,6 +17,10 @@ ENV WORDPRESS_ADMIN_USER=wordpress \
     WORDPRESS_DB_USER=admin \
     WORDPRESS_DB_PASSWORD=wordpress 
 
+# Configuration du Site WordPress
+RUN wp core install --title=Maîtrisez votre infrastructure cloud --admin_user=Lionel --admin_password=Lionel@77 --admin_email=lionel@bellerose.ovh 
+
+
 # Ports d'écoute
 EXPOSE 80 
 
