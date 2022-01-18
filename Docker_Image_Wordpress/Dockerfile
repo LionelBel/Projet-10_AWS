@@ -20,6 +20,9 @@ ENV WORDPRESS_ADMIN_USER=wordpress \
 # Configuration du Site WordPress
 RUN wp core install --title=Maîtrisez votre infrastructure cloud --admin_user=Lionel --admin_password=Lionel@77 --admin_email=lionel@bellerose.ovh 
 
+# Installation plugin Amazon S3 "WP Offlaod Media"
+RUN wp install plugin WP Offload Media --activate 
+
 
 # Ports d'écoute
 EXPOSE 80 
