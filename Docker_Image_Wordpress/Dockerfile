@@ -18,13 +18,13 @@ ENV WORDPRESS_ADMIN_USER=wordpress \
     WORDPRESS_DB_PASSWORD=wordpress 
 
 # Configuration du Site WordPress
-CMD ["wp core install", "--title=Maîtrisez votre infrastructure cloud", "--admin_user=Lionel", "--admin_password=Lionel@77", "--admin_email=lionel@bellerose.ovh"]
+RUN wp core install --title=Maîtrisez votre infrastructure cloud --admin_user=Lionel --admin_password=Lionel@77 --admin_email=lionel@bellerose.ovh
 
 # Installation plugin Amazon S3 "WP Offlaod Media"
-CMD ["wp install plugin Offload Media", "--activate"]
+RUN wp install plugin Offload Media --activate
 
 # Ports d'écoute
 EXPOSE 80 
 
 # Commande du container
-CMD ["apache2-foreground"]  
+CMD [ "apache2-foreground" ]  
