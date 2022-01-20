@@ -7,7 +7,9 @@ RUN apt update \
     && apt install -y mariadb-client \ 
     && curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \ 
     && chmod +x wp-cli.phar \
-    && mv wp-cli.phar /usr/local/bin/wp
+    && mv wp-cli.phar /usr/local/bin/wp \
+    && rm /usr/local/etc/php/php.ini-development \
+    && rm /usr/local/etc/php/php.ini-production
 
 # Variables d'environnements WordPress à éditer
 ENV WORDPRESS_ADMIN_USER=wordpress \
