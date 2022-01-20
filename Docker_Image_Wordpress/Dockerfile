@@ -7,9 +7,7 @@ RUN apt update \
     && apt install -y mariadb-client \ 
     && curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \ 
     && chmod +x wp-cli.phar \
-    && mv wp-cli.phar /usr/local/bin/wp \
-    && rm /usr/local/etc/php/php.ini-development \
-    && rm /usr/local/etc/php/php.ini-production
+    && mv wp-cli.phar /usr/local/bin/wp 
 
 # Variables d'environnements WordPress à éditer
 ENV WORDPRESS_ADMIN_USER=wordpress \
@@ -21,7 +19,7 @@ ENV WORDPRESS_ADMIN_USER=wordpress \
     WORDPRESS_DB_PASSWORD=wordpress 
 
 # Configuration du Site WordPress
-RUN --allow-root wp core install --title=Maîtrisez votre infrastructure cloud --admin_user=Lionel --admin_password=Lionel@77 --admin_email=lionel@bellerose.ovh
+RUN wp core install --title=Maîtrisez votre infrastructure cloud --admin_user=Lionel --admin_password=Lionel@77 --admin_email=lionel@bellerose.ovh
 
 
 # Ports d'écoute
