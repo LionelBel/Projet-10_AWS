@@ -13,7 +13,7 @@ RUN apt update \
     && php wp-cli.phar --info \
     && chmod +x wp-cli.phar \
     && mv wp-cli.phar /usr/local/bin/wp 
-
+   
 # Variables d'environnements WordPress à éditer
 ENV WORDPRESS_ADMIN_USER=wordpress \
     WORDPRESS_ADMIN_PASSWORD=wordpress \
@@ -24,9 +24,8 @@ ENV WORDPRESS_ADMIN_USER=wordpress \
     WORDPRESS_DB_PASSWORD=wordpress 
 
 # Configuration du Site WordPress
-WORKDIR /var/www/html/wp-admin
-RUN wp core install --title=Maîtrisez votre infrastructure cloud --admin_user=Lionel --admin_password=Lionel@77 --admin_email=lionel@bellerose.ovh
-
+USER www-data
+COPY . /var/www/
 
 # Ports d'écoute
 EXPOSE 80 
