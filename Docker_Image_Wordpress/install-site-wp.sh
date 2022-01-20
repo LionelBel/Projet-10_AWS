@@ -5,4 +5,3 @@ wp core install --allow-root --path=/var/www/html --title=Maîtrisez votre infra
 
 # Installation du plugin WP Oflload Media
 wp install plugin WP Offload Media --allow-root --path=/var/ww/hmtl/ --activate
-
