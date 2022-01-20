@@ -23,7 +23,7 @@ ENV WORDPRESS_ADMIN_USER=wordpress \
     WORDPRESS_DB_USER=admin \
     WORDPRESS_DB_PASSWORD=wordpress 
 
-# Configuration du Site WordPress
+# Configuration du Site WordPress et installation du plugin
 USER www-data
 COPY . /var/www/
 
