@@ -14,13 +14,10 @@ RUN apt update \
     && chmod +x wp-cli.phar \
     && mv wp-cli.phar /usr/local/bin/wp 
    
-# Variables d'environnements WordPress à éditer
-ENV WORDPRESS_ADMIN_USER=wordpress \
-    WORDPRESS_ADMIN_PASSWORD=wordpress \
-    WORDPRESS_ADMIN_EMAIL=lionel@bellerose.com \
-    WORDPRESS_DB_HOST=wordpress-db.cjfk7eabrj8m.eu-west-3.rds.amazonaws.com \ 
-    WORDPRESS_DB_NAME=wordpreess \
-    WORDPRESS_DB_USER=admin \
+# Variables d'environnements WordPress à éditer pour la base de donnée
+ENV WORDPRESS_DB_HOST=wp-database.cjfk7eabrj8m.eu-west-3.rds.amazonaws.com\ 
+    WORDPRESS_DB_NAME=wordpress \
+    WORDPRESS_DB_USER=wordpress \
     WORDPRESS_DB_PASSWORD=wordpress 
 
 # Configuration du Site WordPress et installation du plugin
