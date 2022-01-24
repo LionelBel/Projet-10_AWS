@@ -45,6 +45,7 @@ Resources:
 
       #########################################
 
+### Création des instatances Wordpress avec Docker et du LoadBalancer
 ## Création du SecurityGroup du LoadBalancer
   WordpressEC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -67,5 +68,30 @@ Resources:
           ToPort: 22
           CidrIp: 0.0.0.0/0
       VpcId: !Ref Projet10VPC
+
+## Création de la Launch Configuration des instances Wordpress
+  WordpressLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+       AssociatePublicIpAddress:false
+      ImageId: !Ref ami-031eb8d942193d84f
+      InstanceType: t2.micro
+      KeyName: AdminSYS
+      SecurityGroups:
+        - !Ref WordpressEC2SecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          sudo yum update -y
+          sudo amazon-linux-extras install docker
+          sudo systemctl enable docker
+          sudo systemctl start docker.service
+          docker pull lionelbel/wordpress-custom
+          docker run --name=wordpress -d -p 80:80 lionelbel/wordpress-custom:latest
+          docker exec wordpress -it /var/www/install-site-wp.sh
+
+
+
+
 
  
