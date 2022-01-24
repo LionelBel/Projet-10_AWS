@@ -99,11 +99,10 @@ Resources:
         - Fn::Select:
           - 0
           - Fn::GetAZs: eu-west-3a
-      VPCZoneIdentifier: PublicSubnetA
         - Fn::Select:
           - 1
           - Fn::GetAZs: eu-west-3b
-      VPCZoneIdentifier: PublicSubnetB
+      VPCZoneIdentifier: PublicSubnetA, PublicSubnetB
       DesiredCapacity: 2
       MaxSize: 2
       MinSize: 2
@@ -116,6 +115,35 @@ Resources:
     Properties: 
       Port: 80, 443
       Protocol: HTTP, HHTPS
+      VpcId: !Ref Projet10VPC
+
+## Création du LoadBalancer 
+  WOrpressLoadBalancer: 
+    Type:AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: application
+      Scheme:internet-facing
+      SecurityGroups:
+        - !Ref WordpressLBSecurityGroup
+      Subnets:  PublicSubnetA, PublicSubnetB
+  
+  ## Création du security Group du LoadBalancer
+  WordpressLBSecurityGroup:
+    Type:AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Permission HTTP/HTTPS et SSH en entrée et sortie
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
       VpcId: !Ref Projet10VPC
 
 
