@@ -90,6 +90,23 @@ Resources:
           docker run --name=wordpress -d -p 80:80 lionelbel/wordpress-custom:latest
           docker exec wordpress -it /var/www/install-site-wp.sh
 
+## Création de L'auto Scaling Group
+  WordpressAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      LaunchConfigurationName: !Ref WordpressLaunchConfig
+      AvailabilityZones:
+        - Fn::Select:
+          - 0
+          - Fn::GetAZs: eu-west-3a
+      VPCZoneIdentifier: PublicSubnetA
+        - Fn::Select:
+          - 1
+          - Fn::GetAZs: eu-west-3b
+      VPCZoneIdentifier: PublicSubnetB
+      DesiredCapacity: 2
+      MaxSize: 2
+      MinSize: 2
 
 
 
