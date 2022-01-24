@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Configuration du site Wordpress
-wp core install --allow-root --path=/var/www/html --title=Maîtrisez votre infrastructure cloud --admin_user=Lionel --admin_password=Lionel@77 --admin_email=lionel@bellerose.ovh
+wp core install --allow-root --path=/var/www/html --url=Projet10.lab --title=Maîtrisez_votre_infrastructure_cloud --admin_user=Lionel --admin_password=Lionel@77 --admin_email=lionel@bellerose.ovh
 
 # Installation du plugin WP Oflload Media
-wp install plugin WP Offload Media --allow-root --path=/var/ww/hmtl/ --activate
+wp plugin install amazon-s3-and-cloudfront --allow-root --path=/var/www/html --activate
