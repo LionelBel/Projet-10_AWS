@@ -107,7 +107,16 @@ Resources:
       DesiredCapacity: 2
       MaxSize: 2
       MinSize: 2
+       TargetGroupARNs: 
+        - !Ref WordpressTargetGroup
 
+## Création dgu groupe cible (TargetGroup)
+   WordpressTargetGroup: 
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties: 
+      Port: 80, 443
+      Protocol: HTTP, HHTPS
+      VpcId: !Ref Projet10VPC
 
 
 
