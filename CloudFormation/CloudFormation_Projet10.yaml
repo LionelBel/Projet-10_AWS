@@ -209,3 +209,20 @@ Resources:
     Type: AWS::S3::Bucket
 
         ########################################
+
+## Création de la base de données MariaDB
+  WordpressDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: '20'
+      DBInstanceClass: db.t3.micro
+      Engine: mariadb
+      DBName: wordpres
+      MasterUsername: wordpress
+      MasterUserPassword: wordpress
+      MultiAZ: "true"
+    DeletionPolicy: Snapshot
+
+
+
+
