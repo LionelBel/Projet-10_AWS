@@ -106,7 +106,7 @@ Resources:
       DesiredCapacity: 2
       MaxSize: 2
       MinSize: 2
-       TargetGroupARNs: 
+      TargetGroupARNs: 
         - !Ref WordpressTargetGroup
 
 ## Création dgu groupe cible (TargetGroup)
