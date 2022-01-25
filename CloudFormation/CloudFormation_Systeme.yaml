@@ -14,15 +14,17 @@ Description: >-
 
 ## Création solution Amazon S3
 Resources:
-  oc-projet10-lionel-bellerose:
+  projet10:
     Type: AWS::S3::Bucket
 
     ######################################
 
 ## Création de la base de données MariaDB
-  Wordpress_DB:
+  WordpressDB:
     Type: AWS::RDS::DBInstance
     Properties:
+      DBSecurityGroups:
+      - !Ref DBsecurity
       AllocatedStorage: '20'
       DBInstanceClass: db.t2.micro
       AvailabilityZone: eu-west-3a
@@ -30,11 +32,11 @@ Resources:
       DBName: wordpres
       MasterUsername: wordpress
       MasterUserPassword: wordpress
-    MultiAZ: 'true'
-  DeletionPolicy: Snapshot
+      MultiAZ: 'true'
+    DeletionPolicy: Snapshot
 
 ## Création du sécurityGroup De MariaDB
-  DB_security:
+  DBsecurity:
     Type: AWS::RDS::DBSecurityGroup
     Properties:
       DBSecurityGroupIngress:
@@ -67,14 +69,14 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
-      VpcId: !Ref Projet10VPC
+      VpcId: Projet10VPC
 
 ## Création de la Launch Configuration des instances Wordpress
   WordpressLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       AssociatePublicIpAddress: false
-      ImageId: !Ref ami-031eb8d942193d84f
+      ImageId: ami-031eb8d942193d84f
       InstanceType: t2.micro
       KeyName: AdminSYS
       SecurityGroups:
@@ -109,25 +111,15 @@ Resources:
       TargetGroupARNs: 
         - !Ref WordpressTargetGroup
 
-## Création dgu groupe cible (TargetGroup)
+## Création du groupe cible (TargetGroup)
   WordpressTargetGroup: 
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties: 
       Port: 80, 443
       Protocol: HTTP, HTTPS
-      VpcId: !Ref Projet10VPC
+      VpcId: Projet10VPC
 
-## Création du LoadBalancer 
-  WorpressLoadBalancer: 
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties:
-      Type: application
-      Scheme: internet-facing
-      SecurityGroups:
-        - !Ref WordpressLBSecurityGroup
-      Subnets:  PublicSubnetA, PublicSubnetB
-  
-  ## Création du security Group du LoadBalancer
+## Création du security Group du LoadBalancer
   WordpressLBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -144,8 +136,20 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
-      VpcId: !Ref Projet10VPC
+      VpcId: Projet10VPC
 
+## Création du LoadBalancer 
+  WordpressLoadBalancer: 
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: application
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref WordpressLBSecurityGroup
+      Subnets:  
+        - PublicSubnetA
+        - PublicSubnetB
+   
 ## Configuration des port d'écoute du LoadBalancer
   WordpressLoadBlancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
