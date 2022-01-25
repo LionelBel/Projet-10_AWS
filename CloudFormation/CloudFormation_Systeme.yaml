@@ -146,6 +146,16 @@ Resources:
           CidrIp: 0.0.0.0/0
       VpcId: !Ref Projet10VPC
 
+## Configuration des port d'écoute du LoadBalancer
+  WordpressLoadBlancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties: 
+      LoadBalancerArn: !Ref WordpressLoadBalancer
+      Port: 80, 443
+      Protocol: HTTP, HTTPS
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref WordpressTargetGroup
 
 
  
