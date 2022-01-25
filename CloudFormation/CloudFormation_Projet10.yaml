@@ -52,6 +52,7 @@ Resources:
     Properties:
       AvailabilityZone: eu-west-3c
       CidrBlock: 10.0.1.0/24 
+      Tags:
         - Key: Name
           Value: 'VPN'
       VpcId: !Ref Projet10VPC
@@ -63,7 +64,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-west-3c
-      CidrBlock: 10.0.2.0/24 
+      CidrBlock: 10.0.2.0/24
       Tags:
         - Key: Name
           Value: 'INTRANET'
@@ -156,7 +157,7 @@ Resources:
       SubnetId: !Ref PrivateSubnetA
 
 # Routes pour sous-réseau 'VPN'
-   PrivateRouteA:
+  PrivateRouteA:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
@@ -183,9 +184,28 @@ Resources:
       SubnetId: !Ref PrivateSubnetB
 
 # Routes pour sous-réseau 'INTRANET'
-   PrivateRouteB:
+  PrivateRouteB:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
       RouteTableId: !Ref PrivateRouteTableB
+
+#######################################################################################
+#######################################################################################
+
+################################
+### Infrastructure du système ###
+#################################
+
+## Création de l'infrastrucutre système
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  AWS CloudFormation infrastrucutre Template
+
+# Création solution Amazon S3
+Resources:
+  projet10:
+    Type: AWS::S3::Bucket
+
+        ########################################
