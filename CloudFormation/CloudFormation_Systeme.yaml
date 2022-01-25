@@ -22,22 +22,22 @@ Resources:
 ## Création de la base de données MariaDB
   Wordpress_DB:
     Type: AWS::RDS::DBInstance
-      Properties:
-        AllocatedStorage: '20'
-        DBInstanceClass: db.t2.micro
-        AvailabilityZone: eu-west-3a
-        Engine: MariaDB
-        DBName: wordpres
-        MasterUsername: wordpress
-        MasterUserPassword: wordpress
-      MultiAZ: 'true'
+    Properties:
+      AllocatedStorage: '20'
+      DBInstanceClass: db.t2.micro
+      AvailabilityZone: eu-west-3a
+      Engine: MariaDB
+      DBName: wordpres
+      MasterUsername: wordpress
+      MasterUserPassword: wordpress
+    MultiAZ: 'true'
   DeletionPolicy: Snapshot
 
 ## Création du sécurityGroup De MariaDB
   DB_security:
     Type: AWS::RDS::DBSecurityGroup
-      Properties:
-        DBSecurityGroupIngress:
+    Properties:
+      DBSecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: '3306'
           ToPort: '3306'
@@ -119,7 +119,7 @@ Resources:
 
 ## Création du LoadBalancer 
   WOrpressLoadBalancer: 
-    Type:AWS::ElasticLoadBalancingV2::LoadBalancer
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Type: application
       Scheme:internet-facing
@@ -129,10 +129,9 @@ Resources:
   
   ## Création du security Group du LoadBalancer
   WordpressLBSecurityGroup:
-    Type:AWS::EC2::SecurityGroup
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Permission HTTP/HTTPS et SSH en entrée et sortie
-      SecurityGroupEgress:
+      GroupDescription: Permission HTTP/HTTPS 
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
       SecurityGroupIngress: 
