@@ -1,4 +1,4 @@
-# Projet10- AWS
+# Projet10- AWS :
 Nous dispose que de quelques machines pour la gestion de ses outils internes et pour héberger son site internet. Des incidents matériels sur le serveur de messagerie ont pénalisé l'entreprise le mois dernier. Le directeur veut éviter que la situation ne se reproduise mais réalise que fiabiliser les services en interne coûterait très cher.
 L'entreprise décide donc de migrer l’ensemble de son SI vers le cloud. Les outils collaboratifs seront migrés vers Google Apps et le site de l’entreprise sera hébergé sur AWS.
 
