@@ -1,4 +1,3 @@
-
 ### CloudFormation automatiser l'installation de notre infrastructure sur AWS ###
 
 ### Nos services sont dans la Zone de disponibilité AWS Europe(Paris):eu-west-3 ###
@@ -6,63 +5,72 @@
 ################################
 ### Infrastructure du réseau ###
 ################################
-
+#######################################################################################
 ## Création du VPC dans lequel nous allons mettre en place nos machines
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  AWS CloudFormation VPC Template
-##########################################################
-## Intégration de paramètres permettant de standardiser ##
-##    le template CloudFordation.                       ##
-#Parameters:                                             #
-#  VpcCidrBlock:                                         #
-#    Type: String                                        #
-#    Default: 10.0.0.0/16                                #
-#    Description: Enter the main VPC CIDR block.         #
-##########################################################
+  AWS CloudFormation Projet 10
 Resources:
   Projet10VPC:
     Type: 'AWS::EC2::VPC'
     Properties:
-      CidrBlock: 10.0.0.0/16  # " !Ref VpcCidrBlock" : synthaxe avec paramètre
+      CidrBlock: 10.0.0.0/16 
       Tags:
         - Key: Name
-          Value: 'MainVPC'
+          Value: 'Projet10-VPC'
 
 ## Création des sous-réseaux dans les différentes zones de disponibilités
-# Sous-réseau public dans la zone de disponibilité "a"
+# Sous-réseau public-1 dans la zone de disponibilité "a"
   PublicSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-west-3a
-      CidrBlock: 10.0.100.0/24  # "!Select [ 100, !Cidr [ !GetAtt VPC.CidrBlock, 101, 8 ]]" : synthaxe avec paramètre
+      CidrBlock: 10.0.100.0/24  
       Tags:
         - Key: Name
           Value: 'Wordpress-public-1'
       VpcId: !Ref Projet10VPC
 
-# Sous-réseau public dans la zone de disponibilité "b"
+        ########################################
+
+# Sous-réseau public-2 dans la zone de disponibilité "b"
   PublicSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-west-3b
-      CidrBlock: 10.0.200.0/24 # "!Select [ 200, !Cidr [ !GetAtt VPC.CidrBlock, 201, 8 ]]" : synthaxe avec paramètre
+      CidrBlock: 10.0.200.0/24 
       Tags:
         - Key: Name
           Value: 'Wordpress-public-2'
       VpcId: !Ref Projet10VPC
 
-# Sous-réseau privé dans la zone de disponibilité "c"
-  PrivateSubnetC:
+        ########################################
+
+# Sous-réseau privé-1 dans la zone de disponibilité "c"
+  PrivateSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: eu-west-3c
-      CidrBlock: 10.0.1.0/24 # "!Select [ 1, !Cidr [ !GetAtt VPC.CidrBlock, 2, 8 ]]" : synthaxe avec paramètre
+      CidrBlock: 10.0.1.0/24 
       Tags:
         - Key: Name
           Value: 'VPN'
       VpcId: !Ref Projet10VPC
 
+        ########################################
+
+# Sous-réseau privé-2 dans la zone de disponibilité "c"
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-west-3c
+      CidrBlock: 10.0.2.0/24
+      Tags:
+        - Key: Name
+          Value: 'INTRANET'
+      VpcId: !Ref Projet10VPC
+
+#######################################################################################
 ## Création de la passerelle internet
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -78,7 +86,8 @@ Resources:
       VpcId: !Ref Projet10VPC
       InternetGatewayId: !Ref InternetGateway
 
-## Céation des tables de routages, association aux sous-réseaux et création des routes
+#######################################################################################
+## Création des tables de routages, association aux sous-réseaux et création des routes
 # Création des tables de routages 'Wordpress-public-1'
   PublicRouteTableA:
     Type: AWS::EC2::RouteTable
@@ -103,7 +112,7 @@ Resources:
       GatewayId: !Ref InternetGateway
       RouteTableId: !Ref PublicRouteTableA
 
-              ########################################
+        ########################################
 
 # Création des tables de routages 'Wordpress-public-2'
   PublicRouteTableB:
@@ -129,30 +138,57 @@ Resources:
       GatewayId: !Ref InternetGateway
       RouteTableId: !Ref PublicRouteTableB
 
-              ########################################
+        ########################################
 
-# Création des tables de routages 'VPN-privé'
-  PrivateRouteTableC:
+# Création des tables de routages 'VPN'
+  PrivateRouteTableA:
     Type: AWS::EC2::RouteTable
     Properties: 
       VpcId: !Ref Projet10VPC
       Tags:
         - Key: Name
-          Value: VPN-route-privé
+          Value: VPN-route
 
-# Attache au sous-réseau 'VPN-privé'
-  AttachPrivateRouteTableC:
+# Attache au sous-réseau 'VPN'
+  AttachPrivateRouteTableA:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTableC
-      SubnetId: !Ref PrivateSubnetC
+      RouteTableId: !Ref PrivateRouteTableA
+      SubnetId: !Ref PrivateSubnetA
 
-# Routes pour sous-réseau 'Wordpress-privé'
-   PrivateRouteC:
+# Routes pour sous-réseau 'VPN'
+  PrivateRouteA:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
-      RouteTableId: !Ref PrivateRouteTableC
+      RouteTableId: !Ref PrivateRouteTableA
 
-#############################################################
+        ########################################
+
+
+# Création des tables de routages 'INTRANET'
+  PrivateRouteTableB:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      VpcId: !Ref Projet10VPC
+      Tags:
+        - Key: Name
+          Value: Intranet-route
+
+# Attache au sous-réseau 'INTRANET'
+  AttachPrivateRouteTableB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableB
+      SubnetId: !Ref PrivateSubnetB
+
+# Routes pour sous-réseau 'INTRANET'
+  PrivateRouteB:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref PrivateRouteTableB
+
+#######################################################################################
