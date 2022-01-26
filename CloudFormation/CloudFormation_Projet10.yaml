@@ -9,7 +9,7 @@
 ## Création du VPC dans lequel nous allons mettre en place nos machines
 AWSTemplateFormatVersion: 2010-09-09
 Description: >-
-  AWS CloudFormation VPC Template
+  AWS CloudFormation Projet 10
 Resources:
   Projet10VPC:
     Type: 'AWS::EC2::VPC'
@@ -199,14 +199,13 @@ Resources:
 #################################
 
 ## Création de l'infrastrucutre système
-AWSTemplateFormatVersion: 2010-09-09
-Description: >-
-  AWS CloudFormation infrastrucutre Template
 
 # Création solution Amazon S3
-Resources:
   projet10:
     Type: AWS::S3::Bucket
+    Description: Bucket S3 AWS
+    Properties:
+      BucketName: s3-projet-10
 
         ########################################
 
@@ -215,7 +214,8 @@ Resources:
     Type: AWS::RDS::DBInstance
     Properties:
       AllocatedStorage: '20'
-      DBInstanceClass: db.t3.micro
+      DBInstanceClass: db.t2.micro
+      DBInstanceIdentifier: BD-Wordpress
       Engine: mariadb
       DBName: wordpres
       MasterUsername: wordpress
@@ -229,7 +229,7 @@ Resources:
   WordpressEC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Permission HTTP/HTTPS et SSH en entrée et sortie
+      GroupDescription: Permission HTTP HTTPS et SSH en entree et sortie
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
@@ -246,7 +246,7 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
-      VpcId: Projet10VPC
+      VpcId: !Ref Projet10VPC
 
         ########################################
 
@@ -257,7 +257,6 @@ Resources:
       AssociatePublicIpAddress: false
       ImageId: ami-031eb8d942193d84f
       InstanceType: t2.micro
-      KeyName: AdminSYS
       SecurityGroups:
         - !Ref WordpressEC2SecurityGroup
       UserData:
@@ -279,13 +278,11 @@ Resources:
     Properties:
       LaunchConfigurationName: !Ref WordpressLaunchConfig
       AvailabilityZones:
-        - Fn::Select:
-          - 0
-          - Fn::GetAZs: eu-west-3a
-        - Fn::Select:
-          - 1
-          - Fn::GetAZs: eu-west-3b
-      VPCZoneIdentifier: PublicSubnetA, PublicSubnetB
+        - eu-west-3a
+        - eu-west-3b
+      VPCZoneIdentifier: 
+        - !Ref PublicSubnetA 
+        - !Ref PublicSubnetB
       DesiredCapacity: 2
       MaxSize: 2
       MinSize: 2
@@ -298,9 +295,9 @@ Resources:
   WordpressTargetGroup: 
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties: 
-      Port: 80, 443
-      Protocol: HTTP, HTTPS
-      VpcId: Projet10VPC
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref Projet10VPC
 
         ########################################
 
@@ -308,7 +305,7 @@ Resources:
   WordpressLBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Permission HTTP/HTTPS
+      GroupDescription: Permission HTTP HTTPS
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
@@ -321,7 +318,7 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
-      VpcId: Projet10VPC
+      VpcId: !Ref Projet10VPC
 
         ########################################
 
@@ -334,8 +331,8 @@ Resources:
       SecurityGroups:
         - !Ref WordpressLBSecurityGroup
       Subnets:  
-        - PublicSubnetA
-        - PublicSubnetB
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
 
         ########################################
 
@@ -344,10 +341,8 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties: 
       LoadBalancerArn: !Ref WordpressLoadBalancer
-      Port: 80, 443
-      Protocol: HTTP, HTTPS
+      Port: 80
+      Protocol: HTTP
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref WordpressTargetGroup
-
-
