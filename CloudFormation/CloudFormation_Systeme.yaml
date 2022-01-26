@@ -16,43 +16,33 @@ Description: >-
 Resources:
   projet10:
     Type: AWS::S3::Bucket
+    Description: Bucket S3 AWS
+    Properties:
+      BucketName: s3-projet-10
 
-    ######################################
+        ########################################
 
 ## Création de la base de données MariaDB
   WordpressDB:
     Type: AWS::RDS::DBInstance
     Properties:
-      DBSecurityGroups:
-      - !Ref DBsecurity
       AllocatedStorage: '20'
       DBInstanceClass: db.t2.micro
-      AvailabilityZone: eu-west-3a
-      Engine: MariaDB
+      DBInstanceIdentifier: BD-Wordpress
+      Engine: mariadb
       DBName: wordpres
       MasterUsername: wordpress
       MasterUserPassword: wordpress
-      MultiAZ: 'true'
+      MultiAZ: "true"
     DeletionPolicy: Snapshot
 
-## Création du sécurityGroup De MariaDB
-  DBsecurity:
-    Type: AWS::RDS::DBSecurityGroup
-    Properties:
-      DBSecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: '3306'
-          ToPort: '3306'
-          CidrIp: 10.0.0.0/16
-
-      #########################################
-
+#######################################################################################
 ### Création des instatances Wordpress avec Docker et du LoadBalancer
 ## Création du SecurityGroup du LoadBalancer
   WordpressEC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Permission HTTP/HTTPS et SSH en entrée et sortie
+      GroupDescription: Permission HTTP HTTPS et SSH en entree et sortie
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
@@ -69,7 +59,9 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: 0.0.0.0/0
-      VpcId: Projet10VPC
+      VpcId: !Ref Projet10VPC
+
+        ########################################
 
 ## Création de la Launch Configuration des instances Wordpress
   WordpressLaunchConfig:
@@ -78,7 +70,6 @@ Resources:
       AssociatePublicIpAddress: false
       ImageId: ami-031eb8d942193d84f
       InstanceType: t2.micro
-      KeyName: AdminSYS
       SecurityGroups:
         - !Ref WordpressEC2SecurityGroup
       UserData:
@@ -92,38 +83,42 @@ Resources:
           docker run --name=wordpress -d -p 80:80 lionelbel/wordpress-custom:latest
           docker exec wordpress -it /var/www/install-site-wp.sh
 
+        ########################################
+
 ## Création de L'auto Scaling Group
   WordpressAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       LaunchConfigurationName: !Ref WordpressLaunchConfig
       AvailabilityZones:
-        - Fn::Select:
-          - 0
-          - Fn::GetAZs: eu-west-3a
-        - Fn::Select:
-          - 1
-          - Fn::GetAZs: eu-west-3b
-      VPCZoneIdentifier: PublicSubnetA, PublicSubnetB
+        - eu-west-3a
+        - eu-west-3b
+      VPCZoneIdentifier: 
+        - !Ref PublicSubnetA 
+        - !Ref PublicSubnetB
       DesiredCapacity: 2
       MaxSize: 2
       MinSize: 2
       TargetGroupARNs: 
         - !Ref WordpressTargetGroup
 
+        ########################################
+
 ## Création du groupe cible (TargetGroup)
   WordpressTargetGroup: 
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties: 
-      Port: 80, 443
-      Protocol: HTTP, HTTPS
-      VpcId: Projet10VPC
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref Projet10VPC
+
+        ########################################
 
 ## Création du security Group du LoadBalancer
   WordpressLBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Permission HTTP/HTTPS
+      GroupDescription: Permission HTTP HTTPS
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
@@ -136,7 +131,9 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: 0.0.0.0/0
-      VpcId: Projet10VPC
+      VpcId: !Ref Projet10VPC
+
+        ########################################
 
 ## Création du LoadBalancer 
   WordpressLoadBalancer: 
@@ -147,19 +144,18 @@ Resources:
       SecurityGroups:
         - !Ref WordpressLBSecurityGroup
       Subnets:  
-        - PublicSubnetA
-        - PublicSubnetB
-   
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+
+        ########################################
+
 ## Configuration des port d'écoute du LoadBalancer
   WordpressLoadBlancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties: 
       LoadBalancerArn: !Ref WordpressLoadBalancer
-      Port: 80, 443
-      Protocol: HTTP, HTTPS
+      Port: 80
+      Protocol: HTTP
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref WordpressTargetGroup
-
-
- 
