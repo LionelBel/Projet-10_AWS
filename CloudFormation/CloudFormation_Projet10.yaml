@@ -225,7 +225,7 @@ Resources:
 
 #######################################################################################
 ### Création des instatances Wordpress avec Docker et du LoadBalancer
-## Création du SecurityGroup du LoadBalancer
+## Création du SecurityGroup 
   WordpressEC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -243,9 +243,9 @@ Resources:
           ToPort: 443
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 0.0.0.0/0
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 10.0.0.0/16
       VpcId: !Ref Projet10VPC
 
         ########################################
@@ -284,7 +284,7 @@ Resources:
         - !Ref PublicSubnetA 
         - !Ref PublicSubnetB
       DesiredCapacity: 2
-      MaxSize: 2
+      MaxSize: 3
       MinSize: 2
       TargetGroupARNs: 
         - !Ref WordpressTargetGroup
@@ -298,6 +298,49 @@ Resources:
       Port: 80
       Protocol: HTTP
       VpcId: !Ref Projet10VPC
+
+        ########################################
+
+### Création de de la surveillance du CPU avec envoie Mail
+## Création du scaling Policy
+  WordpressScalePolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref WordpressAutoScalingGroup
+      ScalingAdjustment: '1'
+
+        ########################################
+
+## Création de l'alerte CPU
+  WordpressCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: '1'
+      Statistic: Average
+      Threshold: '80'
+      AlarmDescription: 
+      Period: '300'
+      AlarmActions:
+        - !Ref WordpressScalePolicy
+        - !Ref WordpressEmailNotification
+      Namespace: AWS/EC2
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value:
+            Ref: WordpressAutoScalingGroup
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      MetricName: CPUUtilization
+
+        ########################################
+
+## Création de la notification de l'alerte
+  WordpressEmailNotification:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: lionel.bellerose@outlook.com
+          Protocol: email
 
         ########################################
 
@@ -346,3 +389,5 @@ Resources:
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref WordpressTargetGroup
+
+#######################################################################################
