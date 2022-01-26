@@ -319,7 +319,7 @@ Resources:
       EvaluationPeriods: '1'
       Statistic: Average
       Threshold: '80'
-      AlarmDescription: 
+      AlarmDescription: Alerte 80% de CPU utiliser
       Period: '300'
       AlarmActions:
         - !Ref WordpressScalePolicy
