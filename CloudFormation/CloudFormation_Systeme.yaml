@@ -12,8 +12,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   AWS CloudFormation infrastrucutre Template
 
-## Création solution Amazon S3
-Resources:
+# Création solution Amazon S3
   projet10:
     Type: AWS::S3::Bucket
     Description: Bucket S3 AWS
@@ -38,11 +37,12 @@ Resources:
 
 #######################################################################################
 ### Création des instatances Wordpress avec Docker et du LoadBalancer
-## Création du SecurityGroup du LoadBalancer
+## Création du SecurityGroup 
   WordpressEC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Permission HTTP HTTPS et SSH en entree et sortie
+      GroupName: Wordpress-SecurityGroup
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
@@ -56,9 +56,13 @@ Resources:
           ToPort: 443
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 10.0.0.0/16
+        - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: 0.0.0.0/0
+          CidrIp: 82.64.122.100/32
       VpcId: !Ref Projet10VPC
 
         ########################################
@@ -70,18 +74,19 @@ Resources:
       AssociatePublicIpAddress: false
       ImageId: ami-031eb8d942193d84f
       InstanceType: t2.micro
+      KeyName: AdminSYS_AWS
       SecurityGroups:
         - !Ref WordpressEC2SecurityGroup
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
-          sudo yum update -y
-          sudo amazon-linux-extras install docker
-          sudo systemctl enable docker
-          sudo systemctl start docker.service
+          yum update -y
+          amazon-linux-extras install docker -y
+          systemctl enable docker
+          systemctl start docker.service
           docker pull lionelbel/wordpress-custom
           docker run --name=wordpress -d -p 80:80 lionelbel/wordpress-custom:latest
-          docker exec wordpress -it /var/www/install-site-wp.sh
+          docker exec wordpress /var/www/install-site-wp.sh
 
         ########################################
 
@@ -97,10 +102,15 @@ Resources:
         - !Ref PublicSubnetA 
         - !Ref PublicSubnetB
       DesiredCapacity: 2
-      MaxSize: 2
+      MaxSize: 3
       MinSize: 2
       TargetGroupARNs: 
         - !Ref WordpressTargetGroup
+      Tags:
+        - 
+          Key: Name
+          Value: WordPress
+          PropagateAtLaunch: 'true'
 
         ########################################
 
@@ -114,11 +124,55 @@ Resources:
 
         ########################################
 
+### Création de de la surveillance du CPU avec envoie Mail
+## Création du scaling Policy
+  WordpressScalePolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref WordpressAutoScalingGroup
+      ScalingAdjustment: '1'
+
+        ########################################
+
+## Création de l'alerte CPU
+  WordpressCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      EvaluationPeriods: '1'
+      Statistic: Average
+      Threshold: '80'
+      AlarmDescription: Alerte 80% de CPU utiliser
+      Period: '300'
+      AlarmActions:
+        - !Ref WordpressScalePolicy
+        - !Ref WordpressEmailNotification
+      Namespace: AWS/EC2
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value:
+            Ref: WordpressAutoScalingGroup
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      MetricName: CPUUtilization
+
+        ########################################
+
+## Création de la notification de l'alerte
+  WordpressEmailNotification:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: lionel.bellerose@outlook.com
+          Protocol: email
+
+        ########################################
+
 ## Création du security Group du LoadBalancer
   WordpressLBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Permission HTTP HTTPS
+      GroupName: LoadBalancer-SecurityGroup
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
@@ -139,6 +193,7 @@ Resources:
   WordpressLoadBalancer: 
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
+      Name: Lionel-openclassrooms-2022
       Type: application
       Scheme: internet-facing
       SecurityGroups:
