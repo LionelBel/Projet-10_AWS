@@ -15,7 +15,7 @@ RUN apt update \
     && mv wp-cli.phar /usr/local/bin/wp 
    
 # Variables d'environnements WordPress à éditer pour la base de donnée
-ENV WORDPRESS_DB_HOST=wp-database.cjfk7eabrj8m.eu-west-3.rds.amazonaws.com\ 
+ENV WORDPRESS_DB_HOST=bd-Wordpress.cjfk7eabrj8m.eu-west-3.rds.amazonaws.com \ 
     WORDPRESS_DB_NAME=wordpress \
     WORDPRESS_DB_USER=wordpress \
     WORDPRESS_DB_PASSWORD=wordpress 
