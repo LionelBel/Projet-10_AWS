@@ -440,7 +440,15 @@ Resources:
           FromPort: 500
           ToPort: 500
           CidrIp: 82.64.122.100/32
+        - IpProtocol: udp
+          FromPort: 500
+          ToPort: 500
+          CidrIp: 82.64.122.100/32
         - IpProtocol: tcp
+          FromPort: 4500
+          ToPort: 4500
+          CidrIp: 82.64.122.100/32
+        - IpProtocol: udp
           FromPort: 4500
           ToPort: 4500
           CidrIp: 82.64.122.100/32
@@ -469,11 +477,11 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      ImageId: ami-017676ed9e6839284
+      ImageId: ami-03893f53361ae7122
       KeyName: "VPN"
       AvailabilityZone: eu-west-3c
       SubnetId: !Ref PrivateSubnetA
-      PrivateIpAddress: 10.0.1.38
+      PrivateIpAddress: 10.0.1.114
       SecurityGroupIds:
         - !Ref VPNSecurityGroup
       UserData:
