@@ -3,7 +3,7 @@ FROM wordpress
 
 # Dépendances à installer
 RUN apt update \ 
-    && apt upgrade -y \ 
+    && apt upgrade -y \
     && apt autoremove \
     && apt install -y \
     mariadb-client \
@@ -15,8 +15,7 @@ RUN apt update \
     && mv wp-cli.phar /usr/local/bin/wp 
    
 # Variables d'environnements WordPress à éditer pour la base de donnée
-ENV WORDPRESS_DB_HOST=bd-Wordpress.cjfk7eabrj8m.eu-west-3.rds.amazonaws.com \ 
-    WORDPRESS_DB_NAME=wordpress \
+ENV WORDPRESS_DB_NAME=wordpress \
     WORDPRESS_DB_USER=wordpress \
     WORDPRESS_DB_PASSWORD=wordpress 
 
