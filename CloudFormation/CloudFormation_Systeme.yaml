@@ -3,14 +3,14 @@
 
 ### Nos services sont dans la Zone de disponibilité AWS Europe(Paris):eu-west-3 ###
 
-#################################
+#######################################################################################
+#######################################################################################
+
+################################
 ### Infrastructure du système ###
 #################################
 
-## Création de l'infrastrucutre
-AWSTemplateFormatVersion: 2010-09-09
-Description: >-
-  AWS CloudFormation infrastrucutre Template
+## Création de l'infrastrucutre système
 
 # Création solution Amazon S3
   projet10:
@@ -21,18 +21,36 @@ Description: >-
 
         ########################################
 
+## Création du DBSubnetGroup
+  WordpressDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Goupe des SubnetPublicA et SubnetPublicB
+      DBSubnetGroupName: rds-subnetGroup
+      SubnetIds:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+      Tags:
+        -
+          Key: Name
+          Value: RDSSubnetGroup
+
 ## Création de la base de données MariaDB
   WordpressDB:
     Type: AWS::RDS::DBInstance
     Properties:
+      DBSubnetGroupName: !Ref WordpressDBSubnetGroup
       AllocatedStorage: '20'
       DBInstanceClass: db.t2.micro
       DBInstanceIdentifier: BD-Wordpress
       Engine: mariadb
-      DBName: wordpres
+      DBName: wordpress
       MasterUsername: wordpress
       MasterUserPassword: wordpress
+      PubliclyAccessible: "false"
       MultiAZ: "true"
+      VPCSecurityGroups:
+        - !Ref WordpressEC2SecurityGroup
     DeletionPolicy: Snapshot
 
 #######################################################################################
@@ -56,13 +74,13 @@ Description: >-
           ToPort: 443
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
-          FromPort: 3306
-          ToPort: 3306
-          CidrIp: 10.0.0.0/16
-        - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
           CidrIp: 82.64.122.100/32
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 10.0.0.0/16
       VpcId: !Ref Projet10VPC
 
         ########################################
@@ -78,15 +96,18 @@ Description: >-
       SecurityGroups:
         - !Ref WordpressEC2SecurityGroup
       UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          yum update -y
-          amazon-linux-extras install docker -y
-          systemctl enable docker
-          systemctl start docker.service
-          docker pull lionelbel/wordpress-custom
-          docker run --name=wordpress -d -p 80:80 lionelbel/wordpress-custom:latest
-          docker exec wordpress /var/www/install-site-wp.sh
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash
+            yum update -y
+            amazon-linux-extras install docker -y
+            systemctl enable docker
+            systemctl start docker.service
+            docker pull lionelbel/wordpress-custom
+            docker run --name=wordpress -d -p 80:80 -e WORDPRESS_DB_HOST=${rdshostname} lionelbel/wordpress-custom:latest
+            docker exec wordpress /var/www/install-site-wp.sh ${lbdnsname}
+          - rdshostname: !GetAtt WordpressDB.Endpoint.Address
+            lbdnsname: !GetAtt WordpressLoadBalancer.DNSName
 
         ########################################
 
@@ -193,7 +214,7 @@ Description: >-
   WordpressLoadBalancer: 
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: Lionel-openclassrooms-2022
+      Name: Projet-10
       Type: application
       Scheme: internet-facing
       SecurityGroups:
@@ -214,3 +235,4 @@ Description: >-
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref WordpressTargetGroup
+
