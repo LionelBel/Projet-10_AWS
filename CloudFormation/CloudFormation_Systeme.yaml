@@ -236,3 +236,104 @@
         - Type: forward
           TargetGroupArn: !Ref WordpressTargetGroup
 
+#######################################################################################
+### Création des instatances VPN et intranet
+## Création du SecurityGroup
+  VPNSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Permission des ports 500 et 4500 StrongSwan
+      GroupName: VPN-SecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 500
+          ToPort: 500
+          CidrIp: 82.64.122.100/32
+        - IpProtocol: tcp
+          FromPort: 4500
+          ToPort: 4500
+          CidrIp: 82.64.122.100/32
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 82.64.122.100/32
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: icmp
+          FromPort: -1
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref Projet10VPC
+
+        ########################################
+
+## Création Instance VPN
+  VPNInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-017676ed9e6839284
+      KeyName: "VPN"
+      AvailabilityZone: eu-west-3c
+      SubnetId: !Ref PrivateSubnetA
+      PrivateIpAddress: 10.0.1.38
+      SecurityGroupIds:
+        - !Ref VPNSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          ip tunnel add ipsec0 local 10.0.1.38 remote 0.0.0.0 mode vti key 42
+          ip link set ipsec0 up
+          ip route add 192.168.1.0/24 dev ipsec0
+          ip route add 192.168.10.0/24 dev ipsec0
+          strongswan start
+      Tags: 
+        - 
+          Key: Name
+          Value: VPNDistant
+          
+        ########################################
+
+
+## Allocation de EIP au VPN
+  VPNEIPAssaociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId: !Ref VPNInstance
+      EIP: 35.180.167.34
+
+        ########################################
+
+##Création instance IntraNet
+  IntranetInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-031eb8d942193d84f
+      KeyName: "VPN"
+      AvailabilityZone: eu-west-3c
+      SubnetId: !Ref PrivateSubnetB
+      PrivateIpAddress: 10.0.2.100
+      SecurityGroupIds:
+        - !Ref VPNSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+          yum install -y httpd 
+          systemctl enable httpd
+          systemctl start httpd
+      Tags:
+        - 
+          Key: Name
+          Value: IntraNet
