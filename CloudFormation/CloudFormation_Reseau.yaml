@@ -188,7 +188,7 @@ Resources:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
+      InstanceId: !Ref VPNInstance
       RouteTableId: !Ref PrivateRouteTableB
 
 #######################################################################################
