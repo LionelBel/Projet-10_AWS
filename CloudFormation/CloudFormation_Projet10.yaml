@@ -487,7 +487,7 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
-          ip tunnel add ipsec0 local 10.0.1.38 remote 0.0.0.0 mode vti key 42
+          ip tunnel add ipsec0 local 10.0.1.114 remote 0.0.0.0 mode vti key 42
           ip link set ipsec0 up
           ip route add 192.168.1.0/24 dev ipsec0
           ip route add 192.168.10.0/24 dev ipsec0
