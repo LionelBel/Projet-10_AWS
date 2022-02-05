@@ -6,5 +6,8 @@ wp core install --allow-root --path=/var/www/html --url=$1 --title=Maîtrisez_vo
 # Configuration de la langue Française
 wp language core activate fr_FR
 
+# Configuration ddu thème Twenty Twenty
+wp theme activate twentytwenty
+
 # Installation du plugin WP Oflload Media
 wp plugin install amazon-s3-and-cloudfront --allow-root --path=/var/www/html --activate
