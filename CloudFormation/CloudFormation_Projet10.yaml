@@ -477,25 +477,27 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      ImageId: ami-03893f53361ae7122
+      ImageId: ami-0523c7e0a93504de8
       KeyName: "VPN"
       AvailabilityZone: eu-west-3c
       SubnetId: !Ref PrivateSubnetA
-      PrivateIpAddress: 10.0.1.114
+      PrivateIpAddress: 10.0.1.134
       SecurityGroupIds:
         - !Ref VPNSecurityGroup
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
-          ip tunnel add ipsec0 local 10.0.1.114 remote 0.0.0.0 mode vti key 42
+          ip tunnel add ipsec0 local 10.0.1.134 remote 0.0.0.0 mode vti key 42
           ip link set ipsec0 up
           ip route add 192.168.1.0/24 dev ipsec0
           ip route add 192.168.10.0/24 dev ipsec0
-          strongswan start
+          sysctl -w "net.ipv4.conf.ipsec0.disable_policy=1"
+          sysctl -w net.ipv4.conf.ipsec0.rp_filter=0
+          ipsec start
       Tags: 
         - 
           Key: Name
-          Value: VPNDistant
+          Value: AWS-VPN-GW
           
         ########################################
 
@@ -513,6 +515,7 @@ Resources:
   IntranetInstance:
     Type: AWS::EC2::Instance
     Properties:
+    
       InstanceType: t2.micro
       ImageId: ami-031eb8d942193d84f
       KeyName: "VPN"
